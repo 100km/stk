@@ -1,9 +1,10 @@
 package net.rfc1149.canape
 
+import akka.dispatch.ExecutionContext
 import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 import net.liftweb.json.Serialization.write
 import org.jboss.netty.buffer._
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.handler.codec.base64.Base64
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.util.CharsetUtil
@@ -17,49 +18,68 @@ import org.jboss.netty.util.CharsetUtil
  */
 
 abstract class Couch(val host: String,
-		     val port: Int,
-		     private val auth: Option[(String, String)]) extends HTTPBootstrap {
+                     val port: Int,
+                     private val auth: Option[(String, String)])
+  extends HTTPBootstrap {
 
   import implicits._
 
-  private lazy val authorization = {
+  protected[this] implicit val context: ExecutionContext
+
+  private[this] lazy val authorization = {
     val authChannelBuffer = ChannelBuffers.copiedBuffer(auth.get._1 + ":" + auth.get._2,
-							CharsetUtil.UTF_8)
+      CharsetUtil.UTF_8)
     val encodedAuthChannelBuffer = Base64.encode(authChannelBuffer)
     "Basic " + encodedAuthChannelBuffer.toString(CharsetUtil.UTF_8)
   }
 
-  private[this] def makeRequest[T: Manifest](query: String, method: HttpMethod, data: Option[Either[AnyRef, String]], allowChunks: Boolean): CouchRequest[T] = {
+  private[this] def makeRequest[T <: AnyRef : Manifest](query: String, method: HttpMethod, data: Option[Either[AnyRef, String]], allowChunks: Boolean): CouchRequest[T] = {
     val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
-					 method,
-					 "/" + query)
+      method,
+      "/" + query)
     request.setHeader(HttpHeaders.Names.HOST, host)
     request.setHeader(HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Values.GZIP)
     request.setHeader(HttpHeaders.Names.ACCEPT, "application/json")
-    auth foreach { case (login, password) =>
-      request.setHeader(HttpHeaders.Names.AUTHORIZATION, authorization)
+    auth foreach {
+      case (login, password) =>
+        request.setHeader(HttpHeaders.Names.AUTHORIZATION, authorization)
     }
-    data foreach { d =>
-      val cb = ChannelBuffers.copiedBuffer(d.fold({
-	case None  => ""
-	case other => write(other)
-       }, {s => s}), CharsetUtil.UTF_8)
-      request.setHeader(HttpHeaders.Names.CONTENT_LENGTH, cb.readableBytes())
-      request.setHeader(HttpHeaders.Names.CONTENT_TYPE,
-			d.fold({_ => "application/json"},
-			       {_ => "application/x-www-form-urlencoded" }))
-      request.setContent(cb)
+    data foreach {
+      d =>
+        val cb = ChannelBuffers.copiedBuffer(d.fold({
+          case None => ""
+          case other => write(other)
+        }, {
+          s => s
+        }), CharsetUtil.UTF_8)
+        request.setHeader(HttpHeaders.Names.CONTENT_LENGTH, cb.readableBytes())
+        request.setHeader(HttpHeaders.Names.CONTENT_TYPE,
+          d.fold({
+            _ => "application/json"
+          }, {
+            _ => "application/x-www-form-urlencoded"
+          }))
+        request.setContent(cb)
     }
     new SimpleCouchRequest[T](this, request, allowChunks)
   }
 
-  private def convert(data: AnyRef): Some[Either[AnyRef, String]] =
+  private[this] def convert(data: AnyRef): Some[Either[AnyRef, String]] =
     Some(data match {
       case s: String => Right(s)
-      case _         => Left(data)
+      case _ => Left(data)
     })
 
-  def makeGetRequest[T: Manifest](query: String, allowChunks: Boolean = false): CouchRequest[T] =
+  /**
+   * Build a GET HTTP request.
+   *
+   * @param query The query string, including the already-encoded optional parameters.
+   * @param allowChunks True if the handler is ready to handle HTTP chunks, false otherwise.
+   * @tparam T The type of the chunks (if allowChunks is true) or of the result.
+   * @return A request.
+   */
+
+  def makeGetRequest[T <: AnyRef : Manifest](query: String, allowChunks: Boolean = false): CouchRequest[T] =
     makeRequest[T](query, HttpMethod.GET, None, allowChunks)
 
   // POST and PUT requests accept the following data:
@@ -67,23 +87,61 @@ abstract class Couch(val host: String,
   //   - None     => application/json, empty payload
   //   - other    => application/json, converted json to string payload
 
-  def makePostRequest[T: Manifest](query: String, data: AnyRef): CouchRequest[T] =
+  /**
+   * Build a POST HTTP request.
+   *
+   * The data parameter can be one of the following:
+   * <ul>
+   *   <li>a String: it will be passed as-is, with type application/x-www-form-urlencoded;</li>
+   *   <li>None: it will be passed as an empty payload with type application/json;</li>
+   *   <li>other: after being converted to Json, it will be passed with type application/json.</li>
+   * </ul>
+   *
+   * @param query the query string, including the already-encoded optional parameters
+   * @param data the data to post
+   * @tparam T the type of the result
+   * @return a request.
+   *
+   * @throws StatusCode if an error occurs
+   */
+  def makePostRequest[T <: AnyRef : Manifest](query: String, data: AnyRef): CouchRequest[T] =
     makeRequest[T](query, HttpMethod.POST, convert(data), false)
 
-  def makePutRequest[T: Manifest](query: String, data: AnyRef): CouchRequest[T] =
+  /**
+   * Build a PUT HTTP request.
+   *
+   * @see makePostRequest for more information on the data format.
+   *
+   * @param query the query string, including the already-encoded optional parameters
+   * @param data the data to post
+   * @tparam T the type of the result
+   * @return a request
+   *
+   * @throws StatusCode if an error occurs
+   */
+  def makePutRequest[T <: AnyRef : Manifest](query: String, data: AnyRef): CouchRequest[T] =
     makeRequest[T](query, HttpMethod.PUT, convert(data), false)
 
-  def makeDeleteRequest[T: Manifest](query: String): CouchRequest[T] =
+  /**
+   * Build a DELETE HTTP request.
+   *
+   * @param query the query string, including the already-encoded optional parameters
+   * @tparam T the type of the result
+   * @return a request
+   *
+   * @throws StatusCode if an error occurs
+   */
+  def makeDeleteRequest[T <: AnyRef : Manifest](query: String): CouchRequest[T] =
     makeRequest[T](query, HttpMethod.DELETE, None, false)
 
-  /** URI that refers to the database */
+  /**URI that refers to the database */
   private[canape] val uri = "http://" + auth.map(x => x._1 + ":" + x._2 + "@").getOrElse("") + host + ":" + port
 
   protected def canEqual(that: Any) = that.isInstanceOf[Couch]
 
   override def equals(that: Any) = that match {
-      case other: Couch if other.canEqual(this) => uri == other.uri
-      case _                                    => false
+    case other: Couch if other.canEqual(this) => uri == other.uri
+    case _ => false
   }
 
   override def hashCode() = toString.hashCode()
@@ -96,21 +154,24 @@ abstract class Couch(val host: String,
    *
    * @param source the database to replicate from
    * @param target the database to replicate into
-   * @param continuous true if the replication must be continuous, false otherwise
+   * @param params extra parameters to the request
+   * @return a request
    *
    * @throws StatusCode if an error occurs
    */
-  def replicate(source: Database, target: Database, continuous: Boolean): CouchRequest[JValue] = {
-    makePostRequest[JValue]("_replicate",
-			    Map("source" -> source.uriFrom(this),
-				"target" -> target.uriFrom(this),
-				"continuous" -> continuous))
+  def replicate[T <% JObject](source: Database, target: Database, params: T): CouchRequest[JObject] = {
+    makePostRequest[JObject]("_replicate",
+      ("source" -> source.uriFrom(this)) ~
+      ("target" -> target.uriFrom(this)) ~
+      params)
   }
 
   /**
    * CouchDB installation status.
    *
-   * @return the status as a Handler
+   * @return a request
+   *
+   * @throws StatusCode if an error occurs
    */
   def status(): CouchRequest[Couch.Status] = makeGetRequest[Couch.Status]("")
 
@@ -118,16 +179,18 @@ abstract class Couch(val host: String,
   /**
    * CouchDB active tasks.
    *
-   * @return the list of active tasks as a JSON objects list in a Handler
+   * @return a request
+   *
    * @throws StatusCode if an error occurs
    */
-  def activeTasks(): CouchRequest[List[JValue]] = makeGetRequest[List[JValue]]("_active_tasks")
+  def activeTasks(): CouchRequest[List[JObject]] = makeGetRequest[List[JObject]]("_active_tasks")
 
   /**
    * Get a named database. This does not attempt to connect to the database or check
    * its existence.
    *
-   * @return an object representing this database.
+   * @param databaseName the database name
+   * @return an object representing this database
    */
   def db(databaseName: String) = Database(this, databaseName)
 
@@ -135,12 +198,12 @@ abstract class Couch(val host: String,
 
 object Couch {
 
-  /** The Couch instance current status. */
+  /**The Couch instance current status. */
   case class Status(couchdb: String,
-		    version: String,
-		    vendor: Option[VendorInfo])
+                    version: String,
+                    vendor: Option[VendorInfo])
 
   case class VendorInfo(name: String,
-			version: String)
+                        version: String)
 
 }

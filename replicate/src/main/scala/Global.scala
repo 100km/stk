@@ -1,10 +1,10 @@
-import akka.actor.{Actor, ActorSystem, Props}
-import akka.event.{Logging, LoggingAdapter}
+import akka.actor.ActorSystem
+import akka.event.Logging
 import com.typesafe.config.ConfigFactory
 
 object Global {
 
-  val config = Config("steenwerck.cfg", "../steenwerck.cfg")
+  val config = Config("steenwerck.cfg", "../steenwerck.cfg", "../../steenwerck.cfg")
 
   val system = ActorSystem("Replicator", ConfigFactory.load.getConfig("Replicator"))
 

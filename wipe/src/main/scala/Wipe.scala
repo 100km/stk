@@ -1,10 +1,15 @@
+import akka.actor.ActorSystem
 import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 import net.rfc1149.canape._
 import scopt.OptionParser
 
 object Wipe extends App {
 
-  implicit val formats = DefaultFormats
+  import implicits._
+
+  val system = ActorSystem()
+  implicit val dispatcher = system.dispatcher
 
   private object Options {
     var login: String = _
@@ -20,14 +25,41 @@ object Wipe extends App {
   if (!parser.parse(args))
     sys.exit(1)
 
-  val config = Config("steenwerck.cfg")
+  val config = Config("steenwerck.cfg", "../steenwerck.cfg", "../../steenwerck.cfg")
   val hubCouch = new NioCouch(config.read[String]("master.host"),
 			      config.read[Int]("master.port"),
 			      Some(Options.login, Options.password))
-  val hubDatabase = Database(hubCouch, config.read[String]("master.dbname"))
+
+  val cfgDatabase = hubCouch.db("steenwerck-config")
+
+  val newName = try {
+    val oldNameDoc = cfgDatabase("configuration").execute()
+    val oldName = oldNameDoc("dbname").extract[String]
+    val newCount = oldName.substring(11).toInt
+    val newName = "steenwerck-" + (newCount + 1)
+    cfgDatabase.insert(oldNameDoc + ("dbname" -> newName)).execute()
+    newName
+  } catch {
+    case t =>
+      try {
+	cfgDatabase.create()
+      } catch {
+	case e =>
+	  println("Cannot create configuration database: " + e)
+      }
+      cfgDatabase.insert(Map("dbname" -> "steenwerck-0"), "configuration").execute()
+      "steenwerck-0"
+  }
+
+  val hubDatabase = hubCouch.db(newName)
   try {
-    for ((id, _, value) <- hubDatabase.allDocs.execute.items[String, JObject])
-      hubDatabase.delete(id, (value \ "rev").extract[String]).execute
+    println("Creating database " + newName)
+    hubDatabase.create().execute()
+    println("Copying security document")
+    hubDatabase.insert(cfgDatabase("_security").execute(), "_security").execute()
+    println("Inserting configuration document")
+    hubDatabase.insert(Map("dbname" -> newName), "configuration").execute()
+    println("All things done")
   } catch {
       case StatusCode(401, _) =>
 	println("You are not authorized to perform this operation")
@@ -35,6 +67,7 @@ object Wipe extends App {
 	println("Exception caught: " + t)
   }
 
-  hubCouch.releaseExternalResources
+  hubCouch.releaseExternalResources()
+  system.shutdown()
 
 }

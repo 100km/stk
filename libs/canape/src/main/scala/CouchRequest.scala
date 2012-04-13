@@ -1,44 +1,107 @@
 package net.rfc1149.canape
 
-import java.util.concurrent.ArrayBlockingQueue
-import org.jboss.netty.bootstrap.ClientBootstrap
+import akka.actor.{ActorRef, Status}
+import akka.dispatch.{Await, ExecutionContext, Future, Promise}
+import akka.util.Duration
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
-trait CouchRequest[T] {
+trait CouchRequest[T <: AnyRef] {
 
-  type Choice = Either[Throwable, T]
+  implicit val context: ExecutionContext
+
+  implicit val m: Manifest[T]
 
   def connect(): ChannelFuture
 
-  def send(channel: Channel, closeAfter: Boolean)(lastHandler: Choice => Unit): Unit
+  def send(channel: Channel, closeAfter: Boolean, lastHandler: ChannelUpstreamHandler)
 
-  def execute(): T = {
-    import implicits._
-    val future = connect()
-    if (future.await.isSuccess) {
-      val reader = new ArrayBlockingQueue[Either[Throwable, T]](1)
-      send(future.getChannel, true) { d => reader.add(d.asInstanceOf[Either[Throwable, T]]) }
-      reader.take().fold(throw _, { t: T => t })
-    } else
-      throw future.getCause
+  def toFuture(): Future[T] = {
+    val result = Promise[T]()
+    connect().addListener(new ChannelFutureListener {
+      override def operationComplete(future: ChannelFuture) {
+        if (future.isSuccess)
+          send(future.getChannel, true, new CouchRequest.PromiseChannelUpstreamHandler(result))
+        else
+          result failure (future.getCause)
+      }
+    })
+    result
+  }
+
+  def execute(atMost: Duration = Duration.Inf): T =
+    Await.result(toFuture(), atMost)
+
+  def toStreamingFuture(actor: ActorRef): Future[Unit] = {
+    val result = Promise[Unit]()
+    connect().addListener(new ChannelFutureListener {
+      override def operationComplete(future: ChannelFuture) {
+        if (future.isSuccess) {
+          result.success(())
+          send(future.getChannel, true, new CouchRequest.StreamingUpstreamHandler(actor))
+        } else
+          result.failure(future.getCause)
+      }
+    })
+    result
+  }
+
+  def map[U <: AnyRef : Manifest](transformer: (T) => U): CouchRequest[U] =
+    new TransformerRequest[T, U](this, transformer)
+
+}
+
+object CouchRequest {
+
+  private class StreamingUpstreamHandler(actor: ActorRef)
+    extends SimpleChannelUpstreamHandler {
+
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+      actor ! e.getMessage
+    }
+
+    override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+      actor ! Status.Failure(e.getCause)
+    }
+
+    override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+      actor ! 'closed
+    }
+
+  }
+
+  class PromiseChannelUpstreamHandler[T: Manifest](promise: Promise[T])
+    extends SimpleChannelUpstreamHandler {
+
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+      promise success (e.getMessage.asInstanceOf[T])
+    }
+
+    override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+      promise failure (e.getCause)
+    }
+
   }
 
 }
 
-class SimpleCouchRequest[T: Manifest](bootstrap: HTTPBootstrap, val request: HttpRequest, allowChunks: Boolean) extends CouchRequest[T] {
+class SimpleCouchRequest[T <: AnyRef](bootstrap: HTTPBootstrap,
+				      val request: HttpRequest,
+				      allowChunks: Boolean)(implicit val m: Manifest[T],
+							    val context: ExecutionContext)
+  extends CouchRequest[T] {
 
   override def connect(): ChannelFuture = {
     val future = bootstrap.connect()
     val channel = future.getChannel
     if (!allowChunks)
-      channel.getPipeline.addLast("aggregator", new ChunkAggregator(1024*1024))
+      channel.getPipeline.addLast("aggregator", new ChunkAggregator(1024 * 1024))
     channel.getPipeline.addLast("requestInterceptor", new RequestInterceptor)
     channel.getPipeline.addLast("jsonDecoder", new JsonDecoder[T])
     future
   }
 
-  def send(channel: Channel, closeAfter: Boolean)(lastHandler: Choice => Unit): Unit = {
+  override def send(channel: Channel, closeAfter: Boolean, lastHandler: ChannelUpstreamHandler) {
     if (closeAfter)
       request.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
     val pipeline = channel.getPipeline
@@ -47,19 +110,23 @@ class SimpleCouchRequest[T: Manifest](bootstrap: HTTPBootstrap, val request: Htt
     } catch {
       case _: java.util.NoSuchElementException =>
     }
-    pipeline.addLast("lastHandler", util.toUpstreamHandler(lastHandler))
+    pipeline.addLast("lastHandler", lastHandler)
     channel.write(request)
   }
 
 }
 
-class TransformerRequest[T: Manifest, U](request: CouchRequest[T], transformer: T => U) extends CouchRequest[U] {
+private class TransformerRequest[T <: AnyRef, U <: AnyRef](request: CouchRequest[T],
+							   transformer: T => U)(implicit val m: Manifest[U])
+  extends CouchRequest[U] {
+
+  override implicit val context = request.context
+  private implicit val n = request.m
 
   override def connect(): ChannelFuture = request.connect()
 
-  override def send(channel: Channel, closeAfter: Boolean)(lastHandler: Choice => Unit): Unit =
-    request.send(channel, closeAfter) { d: Either[Throwable, T] =>
-      lastHandler(d.fold({ t: Throwable => Left(t) },
-	                 { t: T         => Right(transformer(t)) }))
-    }
+  override def send(channel: Channel, closeAfter: Boolean, lastHandler: ChannelUpstreamHandler) {
+    request.send(channel, closeAfter, new HandlerTransformer(lastHandler, transformer))
+  }
+
 }

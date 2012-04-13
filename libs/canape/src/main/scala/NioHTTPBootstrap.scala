@@ -1,6 +1,6 @@
 package net.rfc1149.canape
 
-import java.net.{InetSocketAddress, URI}
+import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 
 import org.jboss.netty.bootstrap.ClientBootstrap
@@ -15,7 +15,7 @@ trait NioHTTPBootstrap extends HTTPBootstrap {
 
   protected[this] val bootstrap: ClientBootstrap =
     new ClientBootstrap(new NioClientSocketChannelFactory(Executors.newCachedThreadPool,
-							  Executors.newCachedThreadPool))
+      Executors.newCachedThreadPool))
 
   bootstrap.setPipelineFactory(new ChannelPipelineFactory {
     override def getPipeline = {
@@ -29,6 +29,8 @@ trait NioHTTPBootstrap extends HTTPBootstrap {
   override def connect(): ChannelFuture =
     bootstrap.connect(new InetSocketAddress(host, port))
 
-  override def releaseExternalResources(): Unit = bootstrap.releaseExternalResources()
+  override def releaseExternalResources() {
+    bootstrap.releaseExternalResources()
+  }
 
 }

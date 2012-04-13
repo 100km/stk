@@ -1,69 +1,112 @@
+import akka.actor.ActorSystem
+import akka.dispatch.{Await, Future}
+import akka.util.duration._
 import java.io.{File, FileWriter}
 import java.lang.{Process, ProcessBuilder}
-import Message._
 import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 import net.rfc1149.canape._
-import net.rfc1149.canape.implicits._
 import scala.io.Source
-import scopt.OptionParser
+import steenwerck._
 
 object Replicator {
 
   implicit val formats = DefaultFormats
 
+  val system = ActorSystem()
+  implicit val dispatcher = system.dispatcher
+
   private def waitForNoTasks(couch: Couch) = {
     var activeTasksCount: Int = 0
     do {
-      activeTasksCount = couch.activeTasks.execute.size
+      activeTasksCount = couch.activeTasks().execute().size
       Thread.sleep(100)
     } while (activeTasksCount > 0)
+  }
+
+  private def docCount(db1: Database, db2: Database) = {
+    Await.result(Future.sequence(List(db1, db2).map(_.allDocs.toFuture)), 20 seconds).map {
+      _.total_rows
+    }
   }
 
   def replicate(options: Options) {
     val referenceDb = new NioCouch(options.hostName, auth = Some("admin", "admin")).db("steenwerck100km")
 
-    def step(msg: String) = message(referenceDb, "Ne pas enlever la clé USB - " + msg)
+    val siteId = referenceDb("site-info").execute()("site-id").extract[Int]
 
-    step("lancement de la copie")
+    def step(msg: String, warning: Boolean = true) =
+      message(referenceDb, (if (warning) "Ne pas enlever la clé USB - " else "") + msg).toFuture
+
+    def wait(msg: String, seconds: Int)(interruptIf: => Boolean) =
+      for (i <- 1 to seconds) {
+        if (!interruptIf) {
+          step(msg + " (" + i + "/" + seconds + ")")
+          Thread.sleep(1000)
+        }
+      }
+
+    step("construction de la configuration")
 
     val c = new Replicator(options.localDir, options.usbDir)
     c.runCouchDb()
-    Thread.sleep(5000)
     val couch = c.couch
+    wait("lancement de la base sur clé USB", 30) {
+      try {
+        Await.result(couch.status().toFuture map { _ => true } recover { case _ => false }, 100 milliseconds)
+      } catch {
+        case _ => false
+      }
+    }
     val db = couch.db("steenwerck100km")
     try {
-      db.create.execute
+      db.create().execute()
     } catch {
       case StatusCode(412, _) => // Database already exists
+      case e: java.net.ConnectException =>
+        step("impossible de démarrer la base sur clé USB", false)
+        throw e
     }
     step("synchronisation")
-    couch.replicate(db, referenceDb, false).execute
-    couch.replicate(referenceDb, db, false).execute
+    db.replicateTo(referenceDb, ("filter" -> "common/to-replicate")).execute()
+    db.replicateFrom(referenceDb, ("filter" -> "common/to-replicate")).execute()
     waitForNoTasks(couch)
 
     step("compaction")
-    db.compact().execute
-    referenceDb.compact().execute
+    db.compact().execute()
+    referenceDb.compact().execute()
     waitForNoTasks(couch)
 
     step("écriture")
-    db.ensureFullCommit().execute
+    db.ensureFullCommit().execute()
 
     step("vidage du cache")
     (new ProcessBuilder("sync")).start()
 
-    Thread.sleep(5000)
+    step("vérification des documents…")
+    val List(count, refCount) = docCount(db, referenceDb)
+    val synchro = if (count == refCount)
+      "vérification ok"
+    else
+      ("vérifier la synchronisation (clé " + count +", base " + refCount + ")")
+
+    wait(synchro + " - écriture finale sur clé", 5) { false }
 
     c.stopCouchDb()
 
-    message(referenceDb, "La clé USB peut être retirée")
+    val end = step("La clé USB peut être retirée", false)
+    Await.ready(end, 5 seconds)
 
-    couch.releaseExternalResources
-    referenceDb.couch.releaseExternalResources
+    couch.releaseExternalResources()
+    referenceDb.couch.releaseExternalResources()
+
+    system.shutdown()
   }
 }
 
 class Replicator(srcDir: File, usbBaseDir: File) {
+
+  import Replicator._
 
   val dbDir = new File(usbBaseDir, "db")
   val etcDir = new File(usbBaseDir, "etc")
@@ -82,7 +125,7 @@ class Replicator(srcDir: File, usbBaseDir: File) {
   etcDir.mkdirs()
   runDir.mkdirs()
 
-  def fixDefaultIni() = {
+  def fixDefaultIni() {
     val ini = new Ini
 
     ini.load(Source.fromFile(new File(srcDir, "default.ini")))
@@ -104,7 +147,7 @@ class Replicator(srcDir: File, usbBaseDir: File) {
 
   def couch = _couch.get
 
-  def runCouchDb() = {
+  def runCouchDb() {
     fixDefaultIni()
 
     val pb = new ProcessBuilder("couchdb",
@@ -116,7 +159,7 @@ class Replicator(srcDir: File, usbBaseDir: File) {
     _couch = Some(new NioCouch("localhost", 5983, Some("admin", "admin")))
   }
 
-  def stopCouchDb() = {
+  def stopCouchDb() {
     process foreach (_.destroy())
     process = None
     _couch = None
