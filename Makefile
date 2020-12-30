@@ -1,6 +1,5 @@
 BINFILES = bin/replicate bin/wipe bin/loader bin/stats
 DIST = bin.tar.xz
-ROOTDIR = server
 SBT = bin/sbt
 GITVER := $(shell git describe --long --always)
 
@@ -22,16 +21,16 @@ $(DIST): $(BINFILES)
 	tar Jcvf $(DIST) $(BINFILES)
 
 clean::
-	cd $(ROOTDIR) && $(SBT) pointage100km/clean
+	$(SBT) pointage100km/clean
 
 distclean::
 	$(MAKE) clean
-	$(RM) $(JARFILES)
+	$(RM) $(BINFILES)
 
 check::
-	cd $(ROOTDIR) && $(SBT) pointage100km/test
+	$(SBT) pointage100km/test
 
 $(BINFILES): ALWAYS
-	cd $(ROOTDIR) && $(SBT) `basename ${@:.jar=}`/assembly
+	$(SBT) `basename $@`/assembly
 
 ALWAYS::

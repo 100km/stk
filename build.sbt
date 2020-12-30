@@ -19,7 +19,7 @@ lazy val akka =
 
 lazy val assemble =
   Seq(assemblyJarName in assembly := name.value,
-    target in assembly := new File("../bin/"),
+    target in assembly := new File("bin/"),
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheOutput = false, prependShellScript = Some(defaultShellScript :+ "")),
     test in assembly := {})
 
