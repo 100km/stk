@@ -38,7 +38,7 @@ lazy val mysql =
 lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.29")
 
 lazy val common = Defaults.coreDefaultSettings ++ assemble ++
-  Seq(scalaVersion := "2.13.1",
+  Seq(scalaVersion := "2.13.4",
     scalariformAutoformat := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     ScalariformKeys.preferences := ScalariformKeys.preferences.value
