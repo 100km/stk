@@ -130,7 +130,7 @@ class AnalyzerSpec extends Specification with ResultMatchers {
         success
       }
 
-      forall((1 |-> 3).map(RaceId[Int])) { raceId =>
+      forall((1 |-> 3).map(RaceId[Int]).toList) { raceId =>
         forall(ContestantId.subst(ContestantId.unsubst(Await.result(CheckpointsState.contestants(raceId), 1.second)).toVector.sorted)) { contestantId =>
           check(raceId, contestantId)
         }
@@ -163,7 +163,7 @@ class AnalyzerSpec extends Specification with ResultMatchers {
         success
       }
 
-      forall((1 |-> 3).map(RaceId[Int])) { raceId: Int @@ RaceId =>
+      forall((1 |-> 3).map(RaceId[Int]).toList) { raceId: Int @@ RaceId =>
         forall(ContestantId.subst(ContestantId.unsubst(Await.result(CheckpointsState.contestants(raceId), 1.second)).toVector.sorted)) { contestantId: Int @@ ContestantId =>
           check(raceId, contestantId)
         }
