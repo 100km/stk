@@ -1,0 +1,21 @@
+name: Scala CI
+
+on:
+  push:
+    branches: [ ci ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Scala unit tests
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - run: rm replicate/src/test/scala/replicate/ReplicateSpec.scala
+    - name: Run tests
+      run: sbt test
