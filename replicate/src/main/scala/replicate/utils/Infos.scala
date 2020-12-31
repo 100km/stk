@@ -34,7 +34,7 @@ case class Infos(
    */
   val distances: Map[(Int @@ SiteId, Int @@ Lap), Double] = {
     var d: Map[(Int @@ SiteId, Int @@ Lap), Double] = Map()
-    for (lap <- (1 |-> races_laps.max).map(Lap[Int]); siteId <- sites.indices.map(SiteId[Int])) {
+    for (lap <- (1 |-> races_laps.max).map(Lap[Int]).toList; siteId <- sites.indices.map(SiteId[Int])) {
       d += (siteId, lap) -> distance(siteId, lap)
     }
     d
