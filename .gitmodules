@@ -1,0 +1,9 @@
+[submodule "external/canape"]
+	path = external/canape
+	url = https://github.com/samueltardieu/canape
+[submodule "external/octopush-akka"]
+	path = external/octopush-akka
+	url = https://github.com/samueltardieu/octopush-akka
+[submodule "external/rxtelegram"]
+	path = external/rxtelegram
+	url = https://github.com/samueltardieu/rxtelegram
