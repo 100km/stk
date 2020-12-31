@@ -24,3 +24,15 @@ jobs:
     - run: rm replicate/src/test/scala/replicate/ReplicateSpec.scala
     - name: Run tests
       run: sbt test
+  assemble:
+    name: Assembly test
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8
+    - name: Assemble programs
+      run: sbt assembly
