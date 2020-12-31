@@ -1,0 +1,4 @@
+status = [
+  "Scala unit tests"
+]
+delete_merged_branches = true
