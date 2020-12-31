@@ -1,4 +1,6 @@
 status = [
-  "Scala unit tests"
+  "Scala unit tests with Java 8",
+  "Scala unit tests with Java 11",
+  "Scala unit tests with Java 13"
 ]
 delete_merged_branches = true

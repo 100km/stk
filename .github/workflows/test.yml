@@ -8,16 +8,19 @@ on:
 
 jobs:
   build:
-    name: Scala unit tests
+    name: Scala unit tests with Java ${{ matrix.jdk }}
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        jdk: [8, 11, 13]
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
-    - name: Set up JDK 1.8
+    - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: ${{ matrix.jdk }}
     - run: rm replicate/src/test/scala/replicate/ReplicateSpec.scala
     - name: Run tests
       run: sbt test
