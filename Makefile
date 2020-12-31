@@ -21,14 +21,14 @@ $(DIST): $(BINFILES)
 	tar Jcvf $(DIST) $(BINFILES)
 
 clean::
-	$(SBT) pointage100km/clean
+	$(SBT) stk/clean
 
 distclean::
 	$(MAKE) clean
 	$(RM) $(BINFILES)
 
 check::
-	$(SBT) pointage100km/test
+	$(SBT) stk/test
 
 $(BINFILES): ALWAYS
 	$(SBT) `basename $@`/assembly
