@@ -5,6 +5,7 @@ on:
     branches:
       - staging
       - trying
+      - complete-tests
 
 jobs:
   build:
@@ -13,6 +14,11 @@ jobs:
     strategy:
       matrix:
         jdk: [8, 11, 13]
+    services:
+      couchdb:
+        image: couchdb:2.3.1
+        ports:
+          - 5984:5984
     steps:
     - uses: actions/checkout@v2
       with:
@@ -21,7 +27,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.jdk }}
-    - run: rm replicate/src/test/scala/replicate/ReplicateSpec.scala
+    - name: Install steenwerck.conf
+      run: echo "${{ secrets.STEENWERCK_CONF }}" > steenwerck.conf
     - name: Run tests
       run: sbt test
   assemble:
