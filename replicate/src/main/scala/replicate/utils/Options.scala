@@ -127,7 +127,7 @@ object Options {
         else
           success
       }
-      override val showUsageOnError = true
+      override val showUsageOnError = Some(true)
     }
     parser.parse(args, Config())
   }
