@@ -21,6 +21,12 @@ lazy val assemble =
   Seq(assemblyJarName in assembly := name.value,
     target in assembly := new File("bin/"),
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheOutput = false, prependShellScript = Some(defaultShellScript :+ "")),
+    assemblyMergeStrategy in assembly := {
+      case "module-info.class" => MergeStrategy.discard
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
     test in assembly := {})
 
 lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0")
