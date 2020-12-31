@@ -14,7 +14,7 @@ lazy val akka =
     "com.typesafe.akka" %% "akka-stream-typed" % "2.6.10",
     "com.typesafe.akka" %% "akka-http-core" % "10.1.13",
     "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.10" % "test",
-    "com.iheart" %% "ficus" % "1.4.7",
+    "com.iheart" %% "ficus" % "1.5.0",
     "ch.qos.logback" % "logback-classic" % "1.2.3"))
 
 lazy val assemble =
@@ -23,7 +23,7 @@ lazy val assemble =
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheOutput = false, prependShellScript = Some(defaultShellScript :+ "")),
     test in assembly := {})
 
-lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.1")
+lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0")
 
 lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.10.5" % "test",
   fork in Test := true)
