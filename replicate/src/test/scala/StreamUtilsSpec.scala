@@ -24,7 +24,7 @@ class StreamUtilsSpec extends Specification {
     */
     implicit val system = ActorSystem()
 
-    override def after() = system.terminate()
+    override def after = system.terminate()
   }
 
   "sample()" should {

@@ -38,6 +38,6 @@ object PingState {
    * @param siteId the site id
    * @return a Future containing an Option with the last timestamp
    */
-  def getLastPing(siteId: Int @@ SiteId): Future[Option[Long]] = lastPings.future.map(_.get(siteId))
+  def getLastPing(siteId: Int @@ SiteId): Future[Option[Long]] = lastPings.future().map(_.get(siteId))
 
 }

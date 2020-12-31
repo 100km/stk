@@ -17,8 +17,8 @@ class CheckpointsStateSpec extends Specification {
 
   trait CleanRanking extends Scope with BeforeAfter {
     implicit val dispatcher = Global.dispatcher
-    def before() = Await.ready(CheckpointsState.reset(), 1.second)
-    def after() = Await.ready(CheckpointsState.reset(), 1.second)
+    def before = Await.ready(CheckpointsState.reset(), 1.second)
+    def after = Await.ready(CheckpointsState.reset(), 1.second)
   }
 
   "checkpointData#pristine()" should {

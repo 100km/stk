@@ -14,7 +14,7 @@ object RaceUtils {
   implicit val dispatcher = Global.dispatcher
 
   def loadRaceData: Iterator[CheckpointData] =
-    Source.fromInputStream(getClass.getResourceAsStream("/dummy-timings.txt"), "utf-8").getLines.map(Json.parse(_).as[CheckpointData])
+    Source.fromInputStream(getClass.getResourceAsStream("/dummy-timings.txt"), "utf-8").getLines().map(Json.parse(_).as[CheckpointData])
 
   def loadInfos: Infos = Json.parse(getClass.getResourceAsStream("/infos.json")).as[Infos]
 
