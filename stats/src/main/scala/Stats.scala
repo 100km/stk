@@ -62,7 +62,7 @@ object Stats extends App {
         val id = "contestant-" + bibStr
         val doc = Json.obj("_id" -> id, "race" -> (1 << nextInt(3)), "type" -> "contestant", "name" -> s"Bob_$bibStr",
           "first_name" -> s"bobbie$bibStr", "bib" -> bib, "birth" -> (1920 + nextInt(75)).toString(),
-          "sex" -> (if (nextBoolean) "M" else "F"), "stalkers" -> List[String]())
+          "sex" -> (if (nextBoolean()) "M" else "F"), "stalkers" -> List[String]())
         db.insert(doc).execute()
         println("Inserted " + bibStr)
       } catch {
@@ -76,7 +76,7 @@ object Stats extends App {
       val race = nextInt(5)
       update(checkpoint, bib, race)
       Thread sleep options.delay
-      println(s"$i $recentCheckpointsMillis")
+      println(s"$i ${recentCheckpointsMillis()}")
     }
   } finally {
     db.couch.releaseExternalResources().execute()

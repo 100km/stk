@@ -48,5 +48,5 @@ object Telegram {
     }
   }
 
-  private val bot = Global.system.actorOf(Props[TelegramBot], "Telegram")
+  private val bot = Global.system.actorOf(Props[TelegramBot](), "Telegram")
 }
