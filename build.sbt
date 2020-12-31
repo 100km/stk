@@ -48,9 +48,9 @@ lazy val common = Defaults.coreDefaultSettings ++ assemble ++
       .setPreference(SpacesWithinPatternBinders, false)
       .setPreference(SpacesAroundMultiImports, false))
 
-lazy val pointage100km = project
+lazy val stk = project
   .in(file("."))
-  .settings(name := "pointage100km")
+  .settings(name := "stk")
   .aggregate(replicate, wipe, stats, loader)
 
 lazy val stats = project
