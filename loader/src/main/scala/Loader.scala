@@ -39,7 +39,7 @@ object Loader extends App {
     opt[String]('d', "database") text "Mysql database" action { (x, c) => c.copy(database = Some(x)) }
     opt[Long]('r', "repeat") text "Minutes between relaunching (default: do not relaunch)" action { (x, c) => c.copy(repeat = Some(x)) }
     arg[Int]("<year>") text "Year to import" action { (x, c) => c.copy(year = x) }
-    override val showUsageOnError = true
+    override val showUsageOnError = Some(true)
   }
 
   private val options = parser.parse(args, Options()) getOrElse { sys.exit(1) }
