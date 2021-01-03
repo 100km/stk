@@ -57,7 +57,7 @@ lazy val common = Defaults.coreDefaultSettings ++ assemble ++
 lazy val stk = project
   .in(file("."))
   .settings(name := "stk")
-  .aggregate(replicate, wipe, stats, loader)
+  .aggregate(replicate, wipe, stats, loader, sms)
 
 lazy val stats = project
   .in(file("stats"))
@@ -78,6 +78,11 @@ lazy val wipe = project
   .in(file("wipe"))
   .settings(name := "wipe", common, akka, scopt)
   .dependsOn(canape, steenwerck)
+
+lazy val sms = project
+  .in(file("sms"))
+  .settings(name := "sms", common, akka, scopt)
+  .dependsOn(octopush)
 
 lazy val canape = RootProject(file("external/canape"))
 
