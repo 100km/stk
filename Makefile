@@ -1,4 +1,4 @@
-BINFILES = bin/replicate bin/wipe bin/loader bin/stats
+BINFILES = bin/replicate bin/wipe bin/loader bin/stats bin/sms
 DIST = bin.tar.xz
 SBT = bin/sbt
 GITVER := $(shell git describe --long --always)
