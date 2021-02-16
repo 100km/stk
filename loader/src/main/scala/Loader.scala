@@ -63,9 +63,10 @@ object Loader extends App {
     } mkString
   }
 
-  private val IMPORTED_FIELDS = Set("handisport", "id", "year", "first_name", "name", "club", "year", "country", "bib", "sex", "race", "team_name", "team_id")
+  private val IMPORTED_FIELDS = Set("handisport", "id", "year", "first_name", "name", "year", "birth",
+    "city", "zipcode", "country", "bib", "sex", "race")
 
-  private def fix(m: Map[String, Any]): JsObject = JsObject(m.toSeq filter { _ => true /* case (k, _) => IMPORTED_FIELDS.contains(k) */ } map {
+  private def fix(m: Map[String, Any]): JsObject = JsObject(m.toSeq map {
     case ("year", v: java.sql.Date)      => "year" -> JsNumber(v.get(Calendar.YEAR))
     case (k, v: java.math.BigDecimal)    => k -> JsNumber(v.doubleValue())
     case ("id", id: java.lang.Integer)   => "mysql_id" -> JsNumber(id.toInt)
@@ -105,7 +106,7 @@ object Loader extends App {
       val inserted = new AtomicInteger(0)
       val updated = new AtomicInteger(0)
       val q = run.query(
-        "SELECT registrations.*, teams.name as team_name FROM registrations LEFT JOIN teams ON registrations.team_id = teams.id WHERE registrations.year = ?",
+        s"SELECT ${IMPORTED_FIELDS.mkString(",")} FROM registrations WHERE registrations.year = ?",
         new MapListHandler,
         java.lang.Integer.valueOf(options.year)).asScala.toList.map(_.asScala)
       println(s"Starting checking/inserting/updating ${q.size} documents from MySQL")
@@ -113,15 +114,13 @@ object Loader extends App {
       // be overloaded and that we will encounter no timeouts.
       val dbops = Source(q).mapAsyncUnordered(20) { contestant =>
         val bib = contestant("bib").asInstanceOf[java.lang.Long]
-        val id = "contestant-" + bib
+        val id = s"contestant-$bib"
         val firstName = capitalize(contestant("first_name").asInstanceOf[String])
         val name = contestant("name").asInstanceOf[String]
-        // Team id is never used; val teamId = contestant("team_id").asInstanceOf[java.lang.Integer]
         val doc = fix(contestant.toMap.filterNot(_._2 == null)) ++
           Json.obj(
             "_id" -> id,
             "type" -> "contestant",
-            "name" -> name,
             "first_name" -> firstName)
         val desc = s"bib $bib ($firstName $name)"
         existing.get(bib) match {
