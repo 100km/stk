@@ -113,7 +113,7 @@ object Loader extends App {
       // Insertions/updates are grouped by a maximum of 20 at a time to ensure that the database will not
       // be overloaded and that we will encounter no timeouts.
       val dbops = Source(q).mapAsyncUnordered(20) { contestant =>
-        val bib = contestant("bib").asInstanceOf[java.lang.Long]
+        val bib = contestant("bib").asInstanceOf[java.lang.Long].toLong
         val id = s"contestant-$bib"
         val firstName = capitalize(contestant("first_name").asInstanceOf[String])
         val name = contestant("name").asInstanceOf[String]
@@ -141,15 +141,20 @@ object Loader extends App {
               } map { _ => bib }
             }
           case None =>
-            db.insert(doc ++ Json.obj("stalkers" -> Json.arr())) andThen {
-              case _ =>
-                println(s"Inserted $desc")
-                inserted.incrementAndGet()
-            } recover {
-              case t: Throwable =>
-                println(s"Could not insert $desc: $t")
-                Json.obj()
-            } map { _ => bib }
+            if (bib != 0)
+              db.insert(doc ++ Json.obj("stalkers" -> Json.arr())) andThen {
+                case _ =>
+                  println(s"Inserted $desc")
+                  inserted.incrementAndGet()
+              } recover {
+                case t: Throwable =>
+                  println(s"Could not insert $desc: $t")
+                  Json.obj()
+              } map { _ => bib }
+            else {
+              println(s"Will not insert bibless contestant: $desc")
+              FastFuture.successful(0L)
+            }
         }
       }.runFold(Set[Long]()) { case (set, bib) => set + bib }
       val bibs = Await.result(dbops, 1.minute)
