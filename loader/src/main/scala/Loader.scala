@@ -63,16 +63,19 @@ object Loader extends App {
     } mkString
   }
 
-  private def fix(m: Map[String, Any]): JsObject = JsObject(m.toSeq map {
-    case ("year", v: java.sql.Date)   => "year" -> JsNumber(v.get(Calendar.YEAR))
-    case (k, v: java.math.BigDecimal) => k -> JsNumber(v.doubleValue())
-    case (k, v: java.lang.Long)       => k -> JsNumber(v.toLong)
-    case (k, v: java.lang.Integer)    => k -> JsNumber(v.toInt)
-    case (k, v: java.util.Date)       => k -> JsString(v.toString)
-    case ("id", id: String)           => "mysql_id" -> JsString(id)
-    case (k, v: Boolean)              => k -> JsBoolean(v)
-    case (k, v: String)               => k -> JsString(v)
-    case (k, v)                       => throw new IllegalArgumentException(s"unable to decode non-string value `$v' for key `$k'")
+  private val IMPORTED_FIELDS = Set("handisport", "id", "year", "first_name", "name", "club", "year", "country", "bib", "sex", "race", "team_name", "team_id")
+
+  private def fix(m: Map[String, Any]): JsObject = JsObject(m.toSeq filter { _ => true /* case (k, _) => IMPORTED_FIELDS.contains(k) */ } map {
+    case ("year", v: java.sql.Date)      => "year" -> JsNumber(v.get(Calendar.YEAR))
+    case (k, v: java.math.BigDecimal)    => k -> JsNumber(v.doubleValue())
+    case ("id", id: java.lang.Integer)   => "mysql_id" -> JsNumber(id.toInt)
+    case (k, v: java.lang.Long)          => k -> JsNumber(v.toLong)
+    case (k, v: java.lang.Integer)       => k -> JsNumber(v.toInt)
+    case (k, v: java.util.Date)          => k -> JsString(v.toString)
+    case (k, v: Boolean)                 => k -> JsBoolean(v)
+    case (k, v: String)                  => k -> JsString(v)
+    case (k, v: java.time.LocalDateTime) => k -> JsString(v.toString)
+    case (k, v)                          => throw new IllegalArgumentException(s"unable to decode non-string value `$v' (of type ${v.getClass}) for key `$k'")
   })
 
   private def containsAll(doc: JsObject, original: JsObject): Boolean = {
