@@ -2,7 +2,7 @@ FROM apache/couchdb:2.3.1
 MAINTAINER Samuel Tardieu, sam@rfc1149.net
 RUN mkdir -p /usr/share/man/man1
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jdk-headless git make
+    apt-get install -y --no-install-recommends openjdk-11-jdk-headless git make
 RUN useradd -m -c "Steenwerck" -s /bin/bash steenwerck
 COPY . /tmp/stk
 WORKDIR /tmp/stk
@@ -12,7 +12,7 @@ FROM apache/couchdb:2.3.1
 MAINTAINER Samuel Tardieu, sam@rfc1149.net
 RUN mkdir -p /usr/share/man/man1
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jre-headless && \
+    apt-get install -y --no-install-recommends openjdk-11-jre-headless && \
     rm -rf /var/lib/{apt,dpkg}
 ADD docker/cors.ini /opt/couchdb/etc/local.d/
 ADD docker/start.sh /
