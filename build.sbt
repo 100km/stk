@@ -39,12 +39,12 @@ lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" 
 lazy val mysql =
   Seq(libraryDependencies ++= Seq("org.apache.commons" % "commons-dbcp2" % "2.8.0",
     "commons-dbutils" % "commons-dbutils" % "1.7",
-    "mysql" % "mysql-connector-java" % "8.0.24"))
+    "mysql" % "mysql-connector-java" % "8.0.25"))
 
 lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.3")
 
 lazy val common = Defaults.coreDefaultSettings ++ assemble ++
-  Seq(scalaVersion := "2.13.4",
+  Seq(scalaVersion := "2.13.5",
     scalariformAutoformat := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     ScalariformKeys.preferences := ScalariformKeys.preferences.value
