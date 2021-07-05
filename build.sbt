@@ -7,13 +7,13 @@ import sbtassembly.AssemblyPlugin.defaultShellScript
 import scalariform.formatter.preferences._
 
 lazy val akka =
-  Seq(libraryDependencies ++= Seq("com.typesafe.akka" %% "akka-actor" % "2.6.14",
-    "com.typesafe.akka" %% "akka-actor-typed" % "2.6.14",
-    "com.typesafe.akka" %% "akka-slf4j" % "2.6.14",
-    "com.typesafe.akka" %% "akka-stream" % "2.6.14",
-    "com.typesafe.akka" %% "akka-stream-typed" % "2.6.14",
+  Seq(libraryDependencies ++= Seq("com.typesafe.akka" %% "akka-actor" % "2.6.15",
+    "com.typesafe.akka" %% "akka-actor-typed" % "2.6.15",
+    "com.typesafe.akka" %% "akka-slf4j" % "2.6.15",
+    "com.typesafe.akka" %% "akka-stream" % "2.6.15",
+    "com.typesafe.akka" %% "akka-stream-typed" % "2.6.15",
     "com.typesafe.akka" %% "akka-http-core" % "10.2.4",
-    "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.14" % "test",
+    "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.15" % "test",
     "com.iheart" %% "ficus" % "1.5.0",
     "ch.qos.logback" % "logback-classic" % "1.2.3"))
 
@@ -31,10 +31,10 @@ lazy val assemble =
 
 lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.1")
 
-lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.11.0" % "test",
+lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.12.2" % "test",
   fork in Test := true)
 
-lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.7")
+lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.8")
 
 lazy val mysql =
   Seq(libraryDependencies ++= Seq("org.apache.commons" % "commons-dbcp2" % "2.8.0",
