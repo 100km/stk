@@ -15,7 +15,7 @@ lazy val akka =
     "com.typesafe.akka" %% "akka-http-core" % "10.2.4",
     "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.15" % "test",
     "com.iheart" %% "ficus" % "1.5.0",
-    "ch.qos.logback" % "logback-classic" % "1.2.3"))
+    "ch.qos.logback" % "logback-classic" % "1.2.5"))
 
 lazy val assemble =
   Seq(assemblyJarName in assembly := name.value,
