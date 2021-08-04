@@ -37,7 +37,7 @@ lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.
 lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.8")
 
 lazy val mysql =
-  Seq(libraryDependencies ++= Seq("org.apache.commons" % "commons-dbcp2" % "2.8.0",
+  Seq(libraryDependencies ++= Seq("org.apache.commons" % "commons-dbcp2" % "2.9.0",
     "commons-dbutils" % "commons-dbutils" % "1.7",
     "mysql" % "mysql-connector-java" % "8.0.25"))
 
