@@ -13,8 +13,8 @@ lazy val akka =
     "com.typesafe.akka" %% "akka-stream" % "2.6.17",
     "com.typesafe.akka" %% "akka-stream-typed" % "2.6.17",
     "com.typesafe.akka" %% "akka-http-core" % "10.2.7",
-    "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.17" % "test",
-    "com.iheart" %% "ficus" % "1.5.0",
+    "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.16" % "test",
+    "com.iheart" %% "ficus" % "1.5.1",
     "ch.qos.logback" % "logback-classic" % "1.2.8"))
 
 lazy val assemble =
@@ -31,7 +31,7 @@ lazy val assemble =
 
 lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.1")
 
-lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.12.12" % "test",
+lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.13.1" % "test",
   fork in Test := true)
 
 lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.9")
