@@ -31,7 +31,7 @@ lazy val assemble =
 
 lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.1")
 
-lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.13.1" % "test",
+lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.13.2" % "test",
   fork in Test := true)
 
 lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.10")
@@ -44,7 +44,7 @@ lazy val mysql =
 lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.5")
 
 lazy val common = Defaults.coreDefaultSettings ++ assemble ++
-  Seq(scalaVersion := "2.13.7",
+  Seq(scalaVersion := "2.13.8",
     scalariformAutoformat := true,
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     ScalariformKeys.preferences := ScalariformKeys.preferences.value
