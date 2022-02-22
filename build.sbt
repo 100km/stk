@@ -18,21 +18,22 @@ lazy val akka =
     "ch.qos.logback" % "logback-classic" % "1.2.10"))
 
 lazy val assemble =
-  Seq(assemblyJarName in assembly := name.value,
-    target in assembly := new File("bin/"),
-    assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheOutput = false, prependShellScript = Some(defaultShellScript :+ "")),
-    assemblyMergeStrategy in assembly := {
+  Seq(assembly / assemblyJarName := name.value,
+    assembly / target := new File("bin/"),
+    assembly / assemblyCacheOutput := false,
+    assembly / assemblyPrependShellScript := Some(defaultShellScript :+ ""),
+    assembly / assemblyMergeStrategy := {
       case "module-info.class" => MergeStrategy.discard
       case x =>
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
         oldStrategy(x)
     },
-    test in assembly := {})
+    assembly / test := {})
 
 lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.1")
 
 lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.13.3" % "test",
-  fork in Test := true)
+  Test / fork := true)
 
 lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.10")
 
