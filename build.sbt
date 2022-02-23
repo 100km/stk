@@ -32,7 +32,7 @@ lazy val assemble =
 
 lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.1")
 
-lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.14.0" % "test",
+lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.14.1" % "test",
   Test / fork := true)
 
 lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.10")
