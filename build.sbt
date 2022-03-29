@@ -14,7 +14,7 @@ lazy val akka =
     "com.typesafe.akka" %% "akka-stream-typed" % "2.6.18",
     "com.typesafe.akka" %% "akka-http-core" % "10.2.9",
     "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.18" % "test",
-    "com.iheart" %% "ficus" % "1.5.1",
+    "com.iheart" %% "ficus" % "1.5.2",
     "ch.qos.logback" % "logback-classic" % "1.2.11"))
 
 lazy val assemble =
