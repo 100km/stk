@@ -187,7 +187,7 @@ object PingAlert {
         }
     }
 
-  private def pingAlerts(database: Database)(implicit context: ActorContext[_]): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b => sink =>
+  private def pingAlerts(database: Database)(implicit context: ActorContext[_]): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.createGraph(Sink.ignore) { implicit b => sink =>
     import CheckpointWatcher._
     import akka.stream.scaladsl.GraphDSL.Implicits._
 
