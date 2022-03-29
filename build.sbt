@@ -24,6 +24,7 @@ lazy val assemble =
     assembly / assemblyPrependShellScript := Some(defaultShellScript :+ ""),
     assembly / assemblyMergeStrategy := {
       case "module-info.class" => MergeStrategy.discard
+      case PathList(ps @ _*) if ps.last.endsWith(".proto") => MergeStrategy.first
       case x =>
         val oldStrategy = (assembly / assemblyMergeStrategy).value
         oldStrategy(x)
