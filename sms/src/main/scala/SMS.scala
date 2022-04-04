@@ -44,7 +44,6 @@ object SMS extends App {
     for (s <- result.successes) {
       print(f"""    - recipient: ${s.recipient}
       country code: ${s.countryCode}
-      cost: ${s.cost}%.04f${result.currencyCode}
  """)
     }
   } catch {
