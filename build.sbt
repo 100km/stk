@@ -31,7 +31,7 @@ lazy val assemble =
     },
     assembly / test := {})
 
-lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.1")
+lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0")
 
 lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.15.0" % "test",
   Test / fork := true)
