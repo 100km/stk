@@ -15,7 +15,7 @@ lazy val akka =
     "com.typesafe.akka" %% "akka-http-core" % "10.2.10",
     "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.20" % "test",
     "com.iheart" %% "ficus" % "1.5.2",
-    "ch.qos.logback" % "logback-classic" % "1.4.4"))
+    "ch.qos.logback" % "logback-classic" % "1.4.6"))
 
 lazy val assemble =
   Seq(assembly / assemblyJarName := name.value,
@@ -33,7 +33,7 @@ lazy val assemble =
 
 lazy val scopt = Seq(libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0")
 
-lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.17.0" % "test",
+lazy val specs2 = Seq(libraryDependencies += "org.specs2" %% "specs2-core" % "4.20.0" % "test",
   Test / fork := true)
 
 lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.10")
@@ -41,9 +41,9 @@ lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" 
 lazy val mysql =
   Seq(libraryDependencies ++= Seq("org.apache.commons" % "commons-dbcp2" % "2.9.0",
     "commons-dbutils" % "commons-dbutils" % "1.7",
-    "mysql" % "mysql-connector-java" % "8.0.29"))
+    "mysql" % "mysql-connector-java" % "8.0.32"))
 
-lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.6")
+lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.7")
 
 lazy val common = Defaults.coreDefaultSettings ++ assemble ++
   Seq(scalaVersion := "2.13.10",
