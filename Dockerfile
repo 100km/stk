@@ -1,4 +1,4 @@
-FROM apache/couchdb:2.3.1
+FROM apache/couchdb:2.3.1@sha256:02b714ce49774225429e12917deb39f0fe81f43cf70751b8b0579eddde5bff9a
 MAINTAINER Samuel Tardieu, sam@rfc1149.net
 RUN mkdir -p /usr/share/man/man1
 RUN apt-get update && \
