@@ -64,7 +64,7 @@ object Loader extends App {
   }
 
   private val IMPORTED_FIELDS = Set("handisport", "id", "year", "first_name", "name", "year", "birth",
-    "city", "zipcode", "country", "bib", "sex", "race")
+    "city", "zipcode", "country", "bib", "sex", "race", "championship")
 
   private def fix(m: Map[String, Any]): JsObject = JsObject(m.toSeq map {
     case ("year", v: java.sql.Date)      => "year" -> JsNumber(v.get(Calendar.YEAR))
