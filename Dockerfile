@@ -1,4 +1,4 @@
-FROM apache/couchdb:2.3.1
+FROM apache/couchdb:3.3.2
 MAINTAINER Samuel Tardieu, sam@rfc1149.net
 RUN mkdir -p /usr/share/man/man1
 RUN rm /etc/apt/sources.list.d/couchdb.list
@@ -9,7 +9,7 @@ COPY . /tmp/stk
 WORKDIR /tmp/stk
 RUN make bin/replicate
 
-FROM apache/couchdb:2.3.1
+FROM apache/couchdb:3.3.2
 MAINTAINER Samuel Tardieu, sam@rfc1149.net
 RUN mkdir -p /usr/share/man/man1
 RUN rm /etc/apt/sources.list.d/couchdb.list
