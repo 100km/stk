@@ -1,0 +1,9 @@
+{
+  "extends": ["config:recommended", ":automergeMinor", ":automergeBranch"],
+  "packageRules": [
+    {
+      "matchPackagePrefixes": ["com.typesafe.akka:akka-"],
+      "groupName": "akka"
+    }
+  ]
+}

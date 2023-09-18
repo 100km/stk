@@ -3,8 +3,9 @@ name: Scala CI
 on:
   push:
     branches:
-      - staging
-      - trying
+      - renovate/**
+  pull_request:
+  merge_group:
 
 jobs:
   build:

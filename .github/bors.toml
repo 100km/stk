@@ -1,7 +1,0 @@
-status = [
-  "Scala unit tests with Java 11",
-  "Scala unit tests with Java 13",
-  "Scala unit tests with Java 19",
-  "Assembly test"
-]
-delete_merged_branches = true
