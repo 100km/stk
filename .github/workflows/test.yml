@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: Scala unit tests with Java ${{ matrix.jdk }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         jdk: [11, 17, 20]
@@ -28,7 +28,7 @@ jobs:
       run: sbt test
   assemble:
     name: Assembly test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
