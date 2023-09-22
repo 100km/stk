@@ -1,5 +1,5 @@
 {
-  "extends": ["config:recommended", ":automergeMinor", ":automergePr"],
+  "extends": ["config:recommended", ":automergeMinor", ":automergeDigest", ":automergePr"],
   "git-submodules": {
     "enabled": true
   },
