@@ -1,9 +1,6 @@
 name: Scala CI
 
 on:
-  push:
-    branches:
-      - renovate/**
   pull_request:
   merge_group:
 
