@@ -44,7 +44,7 @@ lazy val mysql =
     "commons-dbutils" % "commons-dbutils" % "1.8.1",
     "com.mysql" % "mysql-connector-j" % "8.2.0"))
 
-lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.7")
+lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.8")
 
 lazy val common = Defaults.coreDefaultSettings ++ assemble ++
   Seq(scalaVersion := "2.13.12",
