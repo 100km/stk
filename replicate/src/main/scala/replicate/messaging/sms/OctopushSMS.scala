@@ -11,13 +11,14 @@ import replicate.messaging.Message.{Severity, TextMessage}
 import replicate.utils.Types.PhoneNumber
 import replicate.utils.{FormatUtils, Glyphs}
 
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 class OctopushSMS(context: ActorContext[SMSProtocol], userLogin: String, apiKey: String, sender: Option[String]) extends AbstractBehavior[SMSProtocol](context) with BalanceTracker {
 
   import OctopushSMS._
 
-  private[this] implicit val executionContext = context.executionContext
+  private[this] implicit val executionContext: ExecutionContext = context.executionContext
   private[this] val octopush = new Octopush(userLogin, apiKey)(context.system.toClassic)
   val messageTitle = "Octopush"
   val log = context.log

@@ -5,6 +5,7 @@ import net.rfc1149.canape._
 import play.api.libs.json._
 
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 import scopt.OptionParser
 
 object Wipe extends App {
@@ -23,8 +24,8 @@ object Wipe extends App {
 
   private val options = parser.parse(args, Options()) getOrElse { sys.exit(1) }
 
-  private implicit val system = ActorSystem()
-  private implicit val dispatcher = system.dispatcher
+  private implicit val system: ActorSystem = ActorSystem()
+  private implicit val dispatcher: ExecutionContext = system.dispatcher
 
   val hubCouch = steenwerck.masterCouch(auth = Some(options.login, options.password))
 

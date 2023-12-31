@@ -16,7 +16,7 @@ object RankingState {
 
   type Ranks = Vector[Rank]
 
-  private implicit val rankOrdering = new Ordering[Rank] {
+  private implicit val rankOrdering: Ordering[Rank] = new Ordering[Rank] {
     override def compare(x: Rank, y: Rank) = (x.bestPoint.lap, y.bestPoint.lap) match {
       // Bigger lap is best
       case (xl, yl) if Lap.unwrap(xl) < Lap.unwrap(yl) => 1
