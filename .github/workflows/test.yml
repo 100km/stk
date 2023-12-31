@@ -22,7 +22,7 @@ jobs:
         java-version: ${{ matrix.jdk }}
     - run: rm replicate/src/test/scala/replicate/ReplicateSpec.scala
     - name: Run tests
-      run: sbt test
+      run: sbt ++2.13 test
   assemble:
     name: Assembly test
     runs-on: ubuntu-latest
@@ -36,4 +36,4 @@ jobs:
         distribution: temurin
         java-version: 11
     - name: Assemble programs
-      run: sbt assembly
+      run: sbt ++2.13 assembly
