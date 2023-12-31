@@ -8,7 +8,7 @@ import replicate.state.CheckpointsState.Point
 import replicate.utils.Global
 import replicate.utils.Types._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 
 class CheckpointsStateSpec extends Specification {
@@ -16,7 +16,7 @@ class CheckpointsStateSpec extends Specification {
   sequential
 
   trait CleanRanking extends Scope with BeforeAfter {
-    implicit val dispatcher = Global.dispatcher
+    implicit val dispatcher: ExecutionContext = Global.dispatcher
     def before = Await.ready(CheckpointsState.reset(), 1.second)
     def after = Await.ready(CheckpointsState.reset(), 1.second)
   }

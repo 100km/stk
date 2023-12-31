@@ -9,14 +9,15 @@ import net.ceedubs.ficus.Ficus._
 import replicate.scrutineer.Analyzer.ContestantAnalysis
 
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.ExecutionContext
 
 object Global {
   private val config: Config = steenwerck.steenwerckRootConfig.withFallback(ConfigFactory.load())
 
   private[replicate] val replicateConfig = config.getConfig("replicate").withFallback(config)
-  implicit val system = ActorSystem("replicator", replicateConfig)
-  implicit val dispatcher = system.dispatcher
-  implicit val flowMaterializer = Materializer(system)
+  implicit val system: ActorSystem = ActorSystem("replicator", replicateConfig)
+  implicit val dispatcher: ExecutionContext = system.dispatcher
+  implicit val flowMaterializer: Materializer = Materializer(system)
   val log = Logging(system, "replicate")
 
   val replicateRelaunchInterval: FiniteDuration = replicateConfig.as[FiniteDuration]("replication-relaunch-interval")

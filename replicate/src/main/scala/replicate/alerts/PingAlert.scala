@@ -19,14 +19,14 @@ import replicate.utils.Types.SiteId
 import replicate.utils._
 import scalaz.@@
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 object PingAlert {
 
   private lazy val checkpoints = Global.infos.get.checkpoints
 
-  private implicit val dispatcher = Global.system.dispatcher
+  private implicit val dispatcher: ExecutionContext = Global.system.dispatcher
 
   private case object RecheckTimer
 

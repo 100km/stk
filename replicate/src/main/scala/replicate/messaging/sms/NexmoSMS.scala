@@ -21,15 +21,15 @@ import replicate.utils.Types.PhoneNumber
 import replicate.utils.{FormatUtils, Glyphs, Networks}
 import scalaz.@@
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class NexmoSMS(context: ActorContext[SMSProtocol], senderId: String, apiKey: String, apiSecret: String) extends AbstractBehavior[SMSProtocol](context) with BalanceTracker {
 
   import NexmoSMS.{Message => _, _}
 
-  private[this] implicit val executionContext = context.executionContext
-  private[this] implicit val materializer = Materializer(context)
+  private[this] implicit val executionContext: ExecutionContext = context.executionContext
+  private[this] implicit val materializer: Materializer = Materializer(context)
   val messageTitle = "Nexmo"
   val log = context.log
 

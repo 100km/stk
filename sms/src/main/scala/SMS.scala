@@ -27,7 +27,7 @@ object SMS extends App {
   }
   val options = parser.parse(args, Config()) getOrElse { sys.exit(1) }
 
-  implicit val actorSystem = ActorSystem()
+  implicit val actorSystem: ActorSystem = ActorSystem()
   val octopush = new Octopush(options.userLogin, options.apiKey)
   val sms = Octopush.SMS(smsRecipients = List(options.recipient), smsText = s"${options.message} - STOP au XXXXX", smsType = PremiumFrance, smsSender = Some(options.sender))
   println(s"""Sending "${options.message}" to ${options.recipient}""")

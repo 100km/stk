@@ -6,12 +6,12 @@ import replicate.state.CheckpointsState
 import replicate.utils.Types.RaceId
 import replicate.utils.{Global, Infos}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 
 object RaceUtils {
 
-  implicit val dispatcher = Global.dispatcher
+  implicit val dispatcher: ExecutionContext = Global.dispatcher
 
   def loadRaceData: Iterator[CheckpointData] =
     Source.fromInputStream(getClass.getResourceAsStream("/dummy-timings.txt"), "utf-8").getLines().map(Json.parse(_).as[CheckpointData])

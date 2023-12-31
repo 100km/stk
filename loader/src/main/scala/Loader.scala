@@ -14,7 +14,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler
 import play.api.libs.json._
 import scopt.OptionParser
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 import scala.language.{implicitConversions, postfixOps, reflectiveCalls}
@@ -50,8 +50,8 @@ object Loader extends App {
     def get(i: Int) = cal.get(i)
   }
 
-  implicit val system = ActorSystem()
-  implicit val dispatcher = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val dispatcher: ExecutionContext = system.dispatcher
   val config = steenwerck.steenwerckRootConfig.as[Config]("loader").withFallback(ConfigFactory.load())
   val db = steenwerck.localCouch(config).db(steenwerck.localDbName)
 

@@ -5,6 +5,7 @@ import net.rfc1149.canape.implicits._
 import play.api.libs.json._
 
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 import scala.util.Random._
 
 object Stats extends App {
@@ -27,8 +28,8 @@ object Stats extends App {
 
   private val options = parser.parse(args, Config()) getOrElse { sys.exit(1) }
 
-  private implicit val system = ActorSystem()
-  private implicit val dispatcher = system.dispatcher
+  private implicit val system: akka.actor.ActorSystem = ActorSystem()
+  private implicit val dispatcher: ExecutionContext = system.dispatcher
 
   private implicit val timeout: Duration = (5, SECONDS)
 
