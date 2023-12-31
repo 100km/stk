@@ -1,6 +1,6 @@
 BINFILES = bin/replicate bin/wipe bin/loader bin/stats bin/sms
 DIST = bin.tar.xz
-SBT = bin/sbt
+SBT = bin/sbt ++2.13
 GITVER := $(shell git describe --long --always)
 
 all:: assembly
