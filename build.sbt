@@ -42,7 +42,7 @@ lazy val csv = Seq(libraryDependencies += "com.github.tototoshi" %% "scala-csv" 
 lazy val mysql =
   Seq(libraryDependencies ++= Seq("org.apache.commons" % "commons-dbcp2" % "2.12.0",
     "commons-dbutils" % "commons-dbutils" % "1.8.1",
-    "com.mysql" % "mysql-connector-j" % "8.3.0"))
+    "com.mysql" % "mysql-connector-j" % "8.4.0"))
 
 lazy val scalaz = Seq(libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.8")
 
